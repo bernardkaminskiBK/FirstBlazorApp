@@ -1,7 +1,50 @@
-﻿<h3>ServerComponent</h3>
+﻿@* <p>@server.Name is in @server.City</p> *@
 
-<p>Server is online</p>
+<div data-name="@server.Name" 
+data-status="Server is @(server.IsOnline ? "online" : "offline")"
+     style="color:@(server.IsOnline ? "online" : "offline")">
+    @server.Name is in @server.City that is @(server.IsOnline? "online" : "offline")
+</div>
 
 @code {
-
+    private Server server = new Server { Name = "Server 1", City = "Toronto"};
 }
+
+@* @rendermode InteractiveServer
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>City</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var server in servers)
+        {
+            <tr data-serverServerId="@server.ServerId" @onclick="() => SelectServer(server.ServerId)">
+                <td>@server.Name</td>
+                <td>@server.City</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p>Selected server ServerId: @selectedServerServerId</p>
+
+@code {
+    private int selectedServerServerId;
+
+    private List<Server> servers = new()
+    {
+        new Server { ServerId = 1, Name = "Server 1", City = "Toronto"},
+        new Server { ServerId = 2, Name = "Server 2", City = "Berlin"},
+        new Server { ServerId = 3, Name = "Server 3", City = "Tokyo"}
+    };
+
+    void SelectServer(int ServerId)
+    {
+        selectedServerServerId = ServerId;
+    }
+} *@
