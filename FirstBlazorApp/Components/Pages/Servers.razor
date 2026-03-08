@@ -2,8 +2,6 @@
 
 <h3>ServerStatus</h3>
 
-@* <ServerComponent></ServerComponent> *@
-
 <br />
 <br />
 
@@ -20,6 +18,10 @@
 
 <br />
 
+<ServerComponent></ServerComponent>
+
+<br />
+
 <ul>
     @foreach (var server in servers)
     {
@@ -30,11 +32,30 @@
             </span>
             &nbsp;
             <a href="/servers/@server.ServerId" class="btn btn-link">Edit</a>
+            &nbsp;
+            <EditForm Model="server"
+                      FormName="@($"form-server-{server.ServerId}")"
+                      OnValidSubmit="@(() => { DeleteServer(server.ServerId);})">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </EditForm>
         </li>
     }
 </ul>
 
+<a href="/servers/add" class="btn btn-primary">Add Server</a>
+
 @code {
     private List<Server> servers = ServersRepository.GetServersByCity("Toronto");
     private List<String> cities = CitiesRepository.GetCities();
+
+    @inject NavigationManager Navigation
+
+    private void DeleteServer(int serverId)
+    {
+        if (serverId > 0)
+        {
+            ServersRepository.DeleteServer(serverId);
+            Navigation.Refresh();
+        }
+    }
 }

@@ -1,10 +1,9 @@
-﻿@page "/servers/{id:int}"
+﻿@page "/servers/add"
 
-<h3>EditServer</h3>
+<h3>AddServer</h3>
 <br />
 <br />
 
-@* 3:19:00 *@
 @if (server != null)
 {
     <EditForm Model="server" FormName="formServer" OnValidSubmit="Submit">
@@ -53,31 +52,23 @@
 
         <br />
 
-        <button class="btn btn-primary" type="submit">Update</button>
+        <button class="btn btn-primary" type="submit">Save</button>
         &nbsp;
         <a href="/servers" class="btn btn-primary">Close</a>
     </EditForm>
 }
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
-
     [SupplyParameterFromForm]
-    private Server? server { get; set; }
+    private Server server { get; set; } = new Server() { IsOnline = false };
 
     @inject NavigationManager Navigation
 
-    protected override void OnParametersSet()
-    {
-        server ??= ServersRepository.GetServerById(this.Id);
-    }
-
     private void Submit()
     {
-        if(server != null)
+        if (server != null)
         {
-            ServersRepository.UpdateServer(server.ServerId, server);
+            ServersRepository.AddServer(server);
             Navigation.NavigateTo("/servers");
         }
     }
