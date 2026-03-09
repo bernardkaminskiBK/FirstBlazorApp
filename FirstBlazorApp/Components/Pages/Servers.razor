@@ -1,4 +1,5 @@
 ﻿@page "/Servers"
+@rendermode InteractiveServer
 
 <h3>ServerStatus</h3>
 
@@ -10,7 +11,10 @@
         @foreach (var city in cities)
         {
             <div class="col">
-                <button type="button" class="btn btn-primary">@city</button>
+                <button type="button" class="@(selectedCity.Equals(city, StringComparison.OrdinalIgnoreCase) ? "btn btn-outline-primary" : "btn btn-primary")"
+                        @onclick="@(() => { SelectCity(city); })">
+                    @city
+                </button>
             </div>
         }
     </div>
@@ -18,14 +22,21 @@
 
 <br />
 
+<div class="input-group mb-3">
+    <input type="text" class="form-control" placeholder="Search Servers" 
+    @bind-value="serverFilter"
+    @bind-value:event="oninput"
+    "  />
+    <button class="btn btn-outline-secondary" type="button" id="button-search" @onclick="HandleSearch">Search</button>
+</div>
+
 <ServerComponent @rendermode="InteractiveServer"></ServerComponent>
 
 <br />
 
 <ul>
-    @foreach (var server in servers)
-    {
-        <li>
+   <Virtualize Items="this.servers" Context="server">
+        <li @key="server.ServerId">
             @server.Name in @server.City is
             <span style="color:@((server.IsOnline ? "green" : "red"))">
                 @(server.IsOnline ? "online" : "offline")
@@ -39,7 +50,7 @@
                 <button type="submit" class="btn btn-danger">Delete</button>
             </EditForm>
         </li>
-    }
+    </Virtualize>
 </ul>
 
 <a href="/servers/add" class="btn btn-primary">Add Server</a>
@@ -50,6 +61,20 @@
 
     @inject NavigationManager Navigation
 
+    private string selectedCity = "Toronto";
+
+    private string _serverFilter = "";
+    private string serverFilter
+    {
+        get => _serverFilter; set
+        {
+            _serverFilter = value;
+
+            // do whatever you want
+            this.servers = ServersRepository.SearchServers(_serverFilter);
+        }
+    }
+
     private void DeleteServer(int serverId)
     {
         if (serverId > 0)
@@ -57,5 +82,30 @@
             ServersRepository.DeleteServer(serverId);
             Navigation.Refresh();
         }
+    }
+
+    private void SelectCity(string cityName)
+    {
+        this.selectedCity = cityName;
+        this.servers = ServersRepository.GetServersByCity(this.selectedCity);
+
+        if(cityName == "Halifax")
+        {
+            for(int i = 16; i < 2000; i++)
+            {
+                servers.Add(new Server { ServerId = i, Name = $"Server{i}", City = "Halifax" });
+            }
+        }
+    }
+
+    // private void HandleServerFilterChange(ChangeEventArgs args)
+    // {
+    //     this.serverFilter = args.Value?.ToString() ?? string.Empty;
+    // }
+
+    private void HandleSearch()
+    {
+        this.servers = ServersRepository.SearchServers(serverFilter);
+        this.selectedCity = string.Empty;
     }
 }
